@@ -5,6 +5,7 @@
 #include <tss2/tss2_sys.h>
 
 #include "log.h"
+#include "files.h"
 #include "object.h"
 #include "tool_rc.h"
 #include "tpm2.h"
@@ -2445,6 +2446,9 @@ tool_rc tpm2_rsa_decrypt(ESYS_CONTEXT *ectx, tpm2_loaded_object *keyobj,
         if (rc != tool_rc_success) {
             goto tpm2_rsadecrypt_free_name1;
         }
+
+        printf("size of name1 is %d", name1-> size);
+        files_save_bytes_to_file("/tmp/name.cp", (UINT8 *)name1->name, name1->size);
 
         rc = tpm2_sapi_getcphash(sys_context, name1, 0, 0,
             parameter_hash_algorithm, cp_hash);
@@ -5960,6 +5964,8 @@ tool_rc tpm2_sapi_getcphash(TSS2_SYS_CONTEXT *sys_context,
     //CpBuffer
     memcpy(to_hash + offset, command_parameters, command_parameters_size);
 
+    files_save_bytes_to_file("/tmp/name.cphashdata", (UINT8 *)to_hash, to_hash_len);
+
     //cpHash
     tool_rc rc = tool_rc_success;
     bool result = tpm2_openssl_hash_compute_data(halg, to_hash, to_hash_len,
@@ -5969,6 +5975,31 @@ tool_rc tpm2_sapi_getcphash(TSS2_SYS_CONTEXT *sys_context,
         LOG_ERR("Failed cpHash digest calculation.");
         rc = tool_rc_general_error;
     }
+
+    return rc;
+}
+
+tool_rc tpm2_key_name(ESYS_CONTEXT *ectx, tpm2_loaded_object *keyobj,
+    TPM2B_NAME **name) {
+
+    ESYS_TR keyobj_session_handle = ESYS_TR_NONE;
+    tool_rc rc = tpm2_auth_util_get_shandle(ectx, keyobj->tr_handle,
+        keyobj->session, &keyobj_session_handle);
+    if (rc != tool_rc_success) {
+        return rc;
+    }
+
+    /*
+     * Need sys_context to be able to calculate CpHash
+     */
+    TSS2_SYS_CONTEXT *sys_context = 0;
+    rc = tpm2_getsapicontext(ectx, &sys_context);
+    if(rc != tool_rc_success) {
+        LOG_ERR("Failed to acquire SAPI context.");
+        return rc;
+    }
+
+    rc = tpm2_tr_get_name(ectx, keyobj->tr_handle, name);
 
     return rc;
 }

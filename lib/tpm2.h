@@ -562,4 +562,7 @@ tool_rc tpm2_sapi_getcphash(TSS2_SYS_CONTEXT *sys_context,
 tool_rc tpm2_sapi_getrphash(TSS2_SYS_CONTEXT *sys_context,
     TSS2_RC response_code, TPM2B_DIGEST *rp_hash, TPMI_ALG_HASH halg);
 
+tool_rc tpm2_key_name(ESYS_CONTEXT *ectx, tpm2_loaded_object *keyobj,
+    TPM2B_NAME **name);
+
 #endif /* LIB_TPM2_H_ */

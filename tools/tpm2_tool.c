@@ -60,7 +60,7 @@ static ESYS_CONTEXT *ctx_init(TSS2_TCTI_CONTEXT *tcti_ctx) {
  * Build a list of the TPM2 tools linked into this executable
  */
 #ifndef TPM2_TOOLS_MAX
-#define TPM2_TOOLS_MAX 1024
+#define TPM2_TOOLS_MAX 2048
 #endif
 static const tpm2_tool *tools[TPM2_TOOLS_MAX];
 static unsigned tool_count;

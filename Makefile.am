@@ -202,7 +202,8 @@ tpm2_tools = \
     tools/tpm2_ecdhzgen.c \
     tools/tpm2_zgen2phase.c \
     tools/tpm2_sessionconfig.c \
-    tools/tpm2_getpolicydigest.c
+    tools/tpm2_getpolicydigest.c \
+    tools/tpm2_keyname.c
 
 # Create the symlinks for each tool to the tpm2 and optional tss2 bundled executables
 install-exec-hook:
