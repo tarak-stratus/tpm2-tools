@@ -52,6 +52,39 @@ static void print_clock_info(TPMS_CLOCK_INFO *clock_info, size_t indent_count) {
     tpm2_tool_output("safe: %u\n", clock_info->safe);
 }
 
+static bool print_TPMS_TIME_ATTEST_INFO(TPMS_TIME_ATTEST_INFO *time_info, size_t indent_count)
+{
+    print_yaml_indent(indent_count);
+    tpm2_tool_output("time: %"PRIu64"\n", time_info->time.time);
+
+    print_yaml_indent(indent_count);
+    tpm2_tool_output("clockInfo:\n");
+    print_clock_info(&time_info->time.clockInfo, indent_count + 1);
+
+    print_yaml_indent(indent_count);
+    tpm2_tool_output("firmwareVersion: ");
+    tpm2_util_hexdump((BYTE *)&time_info->firmwareVersion,
+            sizeof(time_info->firmwareVersion));
+    tpm2_tool_output("\n");
+
+    return true;
+}
+
+static bool print_TPMS_CERTIFY_INFO(TPMS_CERTIFY_INFO *info, size_t indent_count) {
+
+    print_yaml_indent(indent_count);
+    tpm2_tool_output("name: ");
+    tpm2_util_hexdump(info->name.name, info->name.size);
+    tpm2_tool_output("\n");
+
+    print_yaml_indent(indent_count);
+    tpm2_tool_output("qualifiedName: ");
+    tpm2_util_hexdump(info->qualifiedName.name, info->qualifiedName.size);
+    tpm2_tool_output("\n");
+
+    return true;
+}
+
 static bool print_TPMS_QUOTE_INFO(TPMS_QUOTE_INFO *info, size_t indent_count) {
 
     print_yaml_indent(indent_count);
@@ -155,6 +188,20 @@ static bool print_TPMS_ATTEST(FILE* fd) {
         print_yaml_indent(1);
         tpm2_tool_output("quote:\n");
         return print_TPMS_QUOTE_INFO(&attest.attested.quote, 2);
+        break;
+
+    case TPM2_ST_ATTEST_CERTIFY:
+        tpm2_tool_output("attested:\n");
+        print_yaml_indent(1);
+        tpm2_tool_output("key:\n");
+        return print_TPMS_CERTIFY_INFO(&attest.attested.certify, 2);
+        break;
+
+    case TPM2_ST_ATTEST_TIME:
+        tpm2_tool_output("attested:\n");
+        print_yaml_indent(1);
+        tpm2_tool_output("time:\n");
+        return print_TPMS_TIME_ATTEST_INFO(&attest.attested.time, 2);
         break;
 
     default:
