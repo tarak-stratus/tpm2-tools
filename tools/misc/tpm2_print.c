@@ -81,6 +81,7 @@ static bool print_TPMS_NV_CERTIFY_INFO(TPMS_NV_CERTIFY_INFO *info, size_t indent
     tpm2_tool_output("offset: %"PRIu16"\n", info->offset);
 
     print_yaml_indent(indent_count);
+    tpm2_tool_output("content: ");
     tpm2_util_hexdump(info->nvContents.buffer, info->nvContents.size);
     tpm2_tool_output("\n");
 
