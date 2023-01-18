@@ -70,6 +70,23 @@ static bool print_TPMS_TIME_ATTEST_INFO(TPMS_TIME_ATTEST_INFO *time_info, size_t
     return true;
 }
 
+static bool print_TPMS_NV_CERTIFY_INFO(TPMS_NV_CERTIFY_INFO *info, size_t indent_count)
+{
+    print_yaml_indent(indent_count);
+    tpm2_tool_output("name: ");
+    tpm2_util_hexdump(info->indexName.name, info->indexName.size);
+    tpm2_tool_output("\n");
+
+    print_yaml_indent(indent_count);
+    tpm2_tool_output("offset: %"PRIu16"\n", info->offset);
+
+    print_yaml_indent(indent_count);
+    tpm2_util_hexdump(info->nvContents.buffer, info->nvContents.size);
+    tpm2_tool_output("\n");
+
+    return true;
+}
+
 static bool print_TPMS_CERTIFY_INFO(TPMS_CERTIFY_INFO *info, size_t indent_count) {
 
     print_yaml_indent(indent_count);
@@ -203,6 +220,12 @@ static bool print_TPMS_ATTEST(FILE* fd) {
         tpm2_tool_output("time:\n");
         return print_TPMS_TIME_ATTEST_INFO(&attest.attested.time, 2);
         break;
+
+    case TPM2_ST_ATTEST_NV:
+        tpm2_tool_output("attested:\n");
+        print_yaml_indent(1);
+        tpm2_tool_output("nvcontents:\n");
+        return print_TPMS_NV_CERTIFY_INFO(&attest.attested.nv, 2);
 
     default:
         LOG_ERR("Cannot print unsupported type 0x%" PRIx16, attest.type);
